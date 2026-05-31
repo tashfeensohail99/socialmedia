@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# Secrets / config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+client_secret*.json
+service_account*.json
+credentials.json
+token.json
+
+# Generated media + DB artifacts (local dev)
+data/posts/
+data/posts_db/
+data/smoke/
+data/usage/*.jsonl
+data/topics/
+data/creds_test/
+data/ffmpeg_last_fail.txt
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+*.mp4
+*.mp3
+*.wav
+*.jpg
+*.jpeg
+*.png
+!docs/**/*.png
+# Bundled background-music tracks SHOULD be committed (they ship with the app).
+!assets/music/*.mp3
+!docs/**/*.jpg
+
+# Locks
+*.lock
+.facebook_post.lock
+.scheduler_daemon.lock
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# uv / pip
+uv.lock
+pip-log.txt
+pip-delete-this-directory.txt

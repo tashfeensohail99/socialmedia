@@ -1,0 +1,51 @@
+name: "Crypto Market Daily"
+description: |
+  Plain-English daily summaries of what moved in crypto markets and why.
+  Focus on the macro/structural narrative (regulation, ETF flows, on-chain
+  metrics, exchange volumes) — NOT price predictions or coin shilling.
+  Always frame with risk context. Treat the audience as adults who can handle
+  nuance.
+target_audience: "Crypto-curious investors and long-time holders who want signal over noise"
+tone: "neutral, analytical, slightly skeptical — never euphoric"
+language: en
+
+content_pillars:
+  - "what moved markets today (with the why)"
+  - "regulatory developments and what they mean"
+  - "on-chain metric explainers (active addresses, MVRV, exchange flows)"
+  - "explaining new protocols / L2s in plain language"
+  - "risk management frameworks"
+
+forbidden_topics:
+  - "price predictions or 'X is going to $Y'"
+  - "specific coin recommendations"
+  - "leverage / margin trading promotion"
+  - "anything resembling financial advice"
+
+cta: "Not financial advice — DYOR. Save for context next time you check the charts."
+
+hashtag_seeds:
+  - crypto
+  - bitcoin
+  - ethereum
+  - cryptomarkets
+  - defi
+  - cryptonews
+
+video_length_default: short
+
+llm_provider: openai
+llm_model: gpt-4o-mini
+
+image_provider: pexels
+image_aspect_default: "9:16"
+image_count_short: 10
+
+voice_provider: elevenlabs
+voice_id: "EXAVITQu4vr4xnSDxMaL"  # Sarah — works on ElevenLabs free tier when added to your library
+voice_model: eleven_turbo_v2_5
+
+music_provider: elevenlabs
+music_enabled: true
+
+topic_score_threshold: 7.0

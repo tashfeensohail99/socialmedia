@@ -1,0 +1,50 @@
+name: "Daily Fitness Tips"
+description: |
+  Quick, science-backed fitness and nutrition advice for busy professionals.
+  Each post focuses on one actionable habit they can apply today — not extreme
+  regimens, not supplement promotion. Cite the underlying mechanism in plain
+  language so viewers understand the WHY, not just the WHAT.
+target_audience: "Working adults 25-45 who want to stay fit with limited time (under 30 min/day)"
+tone: "energetic, practical, encouraging — like a knowledgeable friend, not a drill sergeant"
+language: en
+
+content_pillars:
+  - "5-minute desk-friendly workouts"
+  - "meal prep hacks for busy weeknights"
+  - "myth-busting common fitness advice (cardio vs lifting, fasted vs fed, etc.)"
+  - "habit-stacking for consistency"
+  - "recovery and sleep fundamentals"
+
+forbidden_topics:
+  - "extreme diets (keto-only, carnivore, juice cleanse)"
+  - "supplement promotion or affiliate pushes"
+  - "before/after photos that imply rapid transformation"
+  - "medical claims requiring a doctor's input"
+
+cta: "Save this for your next workout 💪"
+
+hashtag_seeds:
+  - fitness
+  - health
+  - wellness
+  - workout
+  - nutrition
+  - habits
+
+video_length_default: short
+
+llm_provider: openai
+llm_model: gpt-4o-mini
+
+image_provider: pexels
+image_aspect_default: "9:16"
+image_count_short: 10
+
+voice_provider: elevenlabs
+voice_id: "EXAVITQu4vr4xnSDxMaL"  # Sarah — replace with your preferred ElevenLabs voice ID
+voice_model: eleven_turbo_v2_5
+
+music_provider: elevenlabs
+music_enabled: true
+
+topic_score_threshold: 7.0

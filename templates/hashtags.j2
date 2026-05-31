@@ -1,0 +1,25 @@
+You are selecting hashtags for a social-media video in the niche: "{{ niche.name }}".
+
+CONTEXT
+=======
+Topic: {{ topic.title }}
+Caption: {{ caption }}
+
+Seed hashtags from this niche (always include relevant ones):
+{% for tag in niche.hashtag_seeds %}#{{ tag }} {% endfor %}
+
+YOUR TASK
+=========
+Select 15-25 hashtags that mix:
+- 5-8 high-volume tags (>1M posts) — for discovery
+- 5-10 mid-volume tags (100K-1M) — your sweet spot for ranking
+- 3-5 niche-specific tags (<100K) — your audience lives here
+- Any of the seed hashtags above that are relevant
+
+Rules:
+- No banned/spammy tags
+- No tags unrelated to {{ niche.name }}
+- Lowercase, alphanumeric only (no hyphens or underscores)
+
+Output strictly as JSON (no markdown):
+{"hashtags": ["fitness", "workout", ...]}

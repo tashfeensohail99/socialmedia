@@ -1,0 +1,78 @@
+You are designing a {{ video_length }} vertical social-media video for the niche: "{{ niche.name }}".
+
+NICHE CONTEXT
+=============
+Description: {{ niche.description }}
+Target audience: {{ niche.target_audience }}
+Tone: {{ niche.tone }}
+Language: {{ niche.language }}
+
+TOPIC TO COVER
+==============
+Title: {{ topic.title }}
+Context: {{ topic.content }}
+{% if topic.metadata.get("suggested_angle") %}Angle: {{ topic.metadata["suggested_angle"] }}{% endif %}
+
+YOUR TASK
+=========
+Design the video as a coherent narrative with a strong hook, clear payoff, and {{ niche.tone }} delivery.
+
+{% if video_length == "short" %}
+SHORT-VIDEO CONSTRAINTS (vertical 9:16 for Reels / TikTok / YouTube Shorts):
+- Total spoken duration: 30-50 seconds
+- 8-12 distinct visual scenes (one image per scene)
+- **Per scene: write 60-110 characters of voiceover** (roughly 1-2 short sentences,
+  ~4-7 seconds of speech). This is critical — voice plays at ~15 chars/sec, so
+  if you write 50 chars per beat the video will be far too short.
+- Hook delivered in the first 3 seconds
+- One clear takeaway, not multiple
+- Scene descriptions should suit VERTICAL framing — single subjects, close-ups,
+  centered compositions
+{% else %}
+LONG-FORMAT VIDEO CONSTRAINTS (horizontal 16:9 for YouTube main feed / LinkedIn / Facebook):
+- Total spoken duration: 3-5 minutes (target ~4 minutes = 240 seconds)
+- 18-25 distinct visual scenes — each held for 8-15 seconds with a slow zoom (Ken Burns)
+- Documentary / explainer pacing — calm, thoughtful, no hard sells
+- Multi-section structure: cold-open hook → setup → 2-4 main sections → payoff → outro
+- This format will be auto-captioned by YouTube — NO on-screen text instruction needed in your output
+
+**CRITICAL — per-beat length is the #1 failure mode of this task:**
+- Each beat's voiceover_segment MUST be 150-260 characters (minimum 130, never less)
+- That's roughly 3-5 complete sentences — not 1, not 2 — at LEAST 3
+- Voice plays at ~15 chars/sec, so:
+  • 80 chars/beat × 20 beats = 110 seconds (FAIL — way too short)
+  • 200 chars/beat × 22 beats = 290 seconds (~4.8 min, PASS)
+- Each beat must develop its idea: state, explain WHY, give a concrete example or
+  detail, then bridge to the next scene
+- One-sentence beats are NOT acceptable for long-format
+
+EXAMPLE of a single beat at the right length (215 chars):
+"Now we add the garlic. Don't just toss it in cold — push the onions to the
+edge of the pan and let the garlic hit the bare hot surface for about fifteen
+seconds. That's what blooms its oils and gives the whole dish that
+restaurant-quality depth."
+
+Compare that to the WRONG length (35 chars): "Add garlic and cook briefly."
+
+**Scene descriptions** should suit HORIZONTAL/landscape framing — wide angles,
+establishing shots, room for camera movement. NOT close-up portrait shots.
+NO TEXT INSTRUCTION in image prompts (long-format scenes shouldn't have on-screen text).
+{% endif %}
+
+Output strictly as JSON (no markdown, no commentary), matching this schema:
+
+{
+  "narrative_script": "<the full spoken voiceover, written as if being read aloud, no stage directions>",
+  "duration_sec": <number, your estimate>,
+  "image_count": <integer, how many images you'll need>,
+  "hook_text": "<≤8 words to overlay on the first frame>",
+  "story_beats": [
+    {"order": 1, "scene_description": "<vivid visual description for image generation>", "voiceover_segment": "<the words spoken during this scene>", "duration_sec": <number>}
+  ]
+}
+
+The number of story_beats MUST equal image_count. Sum of beat durations should equal duration_sec.
+{% if niche.forbidden_topics %}
+
+NEVER include: {{ niche.forbidden_topics | join(", ") }}.
+{% endif %}

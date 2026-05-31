@@ -1,0 +1,19 @@
+You are writing a music-generation prompt for the background track of a video in the niche: "{{ niche.name }}".
+
+VIDEO
+=====
+Topic: {{ topic.title }}
+Tone: {{ niche.tone }}
+{% if mood_hint %}Mood for this specific video: {{ mood_hint }}{% endif %}
+
+YOUR TASK
+=========
+Write ONE music-generation prompt that:
+- Names the genre/style (e.g. "lo-fi hip-hop", "uplifting orchestral", "minimal electronic")
+- Specifies tempo (e.g. "85 bpm")
+- Lists 2-4 prominent instruments
+- States the mood in 2-3 adjectives
+- Is INSTRUMENTAL only — no vocals
+- Matches the {{ niche.tone }} energy of the niche
+
+Keep it under 200 characters. Output the prompt directly. No preamble, no JSON.

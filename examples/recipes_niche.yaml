@@ -1,0 +1,50 @@
+name: "30-Minute Weeknight Recipes"
+description: |
+  Approachable recipes that go from pantry to plate in 30 minutes or less,
+  using ingredients most home cooks already have. Each post is one complete
+  recipe with a clear hook ("the trick is..."), the ingredient list, and
+  3-5 numbered steps. Avoid unfamiliar ingredients without a substitution.
+target_audience: "Home cooks who work full-time and want real meals — not snacks or assembly jobs"
+tone: "warm, confident, practical — the friend who actually cooks"
+language: en
+
+content_pillars:
+  - "one-pan dinners"
+  - "pantry-staple meals (rice, beans, eggs, pasta)"
+  - "quick sauces that elevate boring proteins"
+  - "vegetable-forward sides"
+  - "leftover transformation hacks"
+
+forbidden_topics:
+  - "diet-restricted recipes (keto, paleo) unless explicitly framed as one option"
+  - "obscure ingredients without a common substitute"
+  - "expensive cuts of meat or specialty equipment"
+
+cta: "Save this for your next grocery run 🛒"
+
+hashtag_seeds:
+  - recipes
+  - easyrecipes
+  - weeknightdinner
+  - homecooking
+  - 30minutemeals
+  - mealideas
+
+video_length_default: long
+
+llm_provider: openai
+llm_model: gpt-4o-mini
+
+image_provider: pexels
+image_aspect_default: "9:16"
+image_count_short: 10
+image_count_long: 18
+
+voice_provider: elevenlabs
+voice_id: "EXAVITQu4vr4xnSDxMaL"  # Sarah — works on ElevenLabs free tier when added to your library
+voice_model: eleven_turbo_v2_5
+
+music_provider: elevenlabs
+music_enabled: true
+
+topic_score_threshold: 7.0

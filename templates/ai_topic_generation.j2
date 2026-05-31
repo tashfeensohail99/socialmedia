@@ -1,0 +1,32 @@
+You are generating fresh content topic ideas for the niche: "{{ niche.name }}".
+
+NICHE
+=====
+Description: {{ niche.description }}
+Audience: {{ niche.target_audience }}
+Tone: {{ niche.tone }}
+
+Content pillars:
+{% for pillar in niche.content_pillars %}- {{ pillar }}
+{% endfor %}
+{% if niche.forbidden_topics %}
+Avoid:
+{% for t in niche.forbidden_topics %}- {{ t }}
+{% endfor %}{% endif %}
+{% if recent_topics %}
+RECENT TOPICS (do NOT repeat these or anything semantically similar):
+{% for t in recent_topics %}- {{ t }}
+{% endfor %}{% endif %}
+
+YOUR TASK
+=========
+Generate {{ count }} fresh, distinct topic ideas for short-form vertical videos in this niche. Each should:
+- Have a strong hook angle (curiosity gap, contrarian take, or actionable surprise)
+- Be specific (not "tips for fitness" — try "the 90-second rule that fixes your morning workout")
+- Match the niche's content pillars
+- Avoid the forbidden topics
+
+Output strictly as JSON (no markdown):
+{"topics": [
+  {"title": "<the hook-style title>", "content": "<2-3 sentences of context the writer needs>"}
+]}

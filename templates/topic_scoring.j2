@@ -1,0 +1,35 @@
+You are scoring a candidate topic for the niche: "{{ niche.name }}".
+
+NICHE CONTEXT
+=============
+Description: {{ niche.description }}
+
+Target audience: {{ niche.target_audience }}
+
+Tone: {{ niche.tone }}
+
+Content pillars (this niche's preferred topics):
+{% for pillar in niche.content_pillars %}- {{ pillar }}
+{% endfor %}
+{% if niche.forbidden_topics %}
+Forbidden topics (do NOT score these highly):
+{% for t in niche.forbidden_topics %}- {{ t }}
+{% endfor %}{% endif %}
+
+CANDIDATE TOPIC
+===============
+Title: {{ topic.title }}
+
+Content / context:
+{{ topic.content }}
+
+YOUR TASK
+=========
+Score this topic from 1-10 on its fit for the niche above. Consider:
+- Does it serve the target audience?
+- Does it align with the content pillars?
+- Does it violate any forbidden topics? (If yes, score ≤ 3.)
+- Is there a strong hook or angle?
+
+Output strictly as JSON (no markdown, no commentary):
+{"score": <integer 1-10>, "reason": "<one sentence why>", "suggested_angle": "<one sentence describing how to frame this for a short video>"}

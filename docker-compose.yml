@@ -1,0 +1,31 @@
+# Dev-only docker-compose.
+# Production deploys (Railway, Render, Fly.io) provide managed Postgres directly —
+# this file just gives you a local DB so you don't have to install Postgres on the
+# host machine.
+#
+# Usage:
+#   docker compose up -d postgres
+#   docker compose down                # stop
+#   docker compose down -v             # stop + wipe data
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sma_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sma
+      POSTGRES_PASSWORD: sma
+      POSTGRES_DB: sma
+    ports:
+      - "5432:5432"
+    volumes:
+      - sma_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sma -d sma"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  sma_pg_data:

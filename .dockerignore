@@ -1,0 +1,40 @@
+# Don't ship build artifacts, secrets, or huge caches into the image.
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+.env
+.env.*
+!.env.example
+
+# Generated media + DB
+data/
+logs/
+*.db
+*.db-*
+*.mp4
+*.mp3
+*.jpg
+*.jpeg
+*.png
+
+# Frontend lives in its own image — exclude
+frontend/
+
+# Docs + dev scripts not needed at runtime
+docs/
+tests/
+scripts/
+
+# OS junk
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

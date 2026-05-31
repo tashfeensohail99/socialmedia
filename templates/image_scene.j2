@@ -1,0 +1,30 @@
+You are writing image-generation prompts (or stock-image search queries) for a video in the niche: "{{ niche.name }}".
+
+CONTEXT
+=======
+Niche tone: {{ niche.tone }}
+Topic: {{ topic.title }}
+
+SCENE TO ILLUSTRATE
+===================
+Scene number: {{ beat.order }} of {{ total_beats }}
+Scene description: {{ beat.scene_description }}
+Voiceover during scene: "{{ beat.voiceover_segment }}"
+
+YOUR TASK
+=========
+{% if for_stock_search %}
+Output 3-5 short search queries (2-4 words each) that would find a high-quality vertical photo on a stock library to illustrate this scene. Prefer concrete nouns over abstract concepts.
+
+Output strictly as JSON: {"queries": ["query 1", "query 2", ...]}
+{% else %}
+Write ONE detailed image-generation prompt for this scene. The image will be used at 9:16 vertical aspect ratio.
+
+Requirements:
+- Vivid, specific visual description (lighting, composition, mood)
+- Photorealistic style (no illustrations, no cartoons, unless the niche calls for it)
+- No text or typography in the image
+- Match the tone: {{ niche.tone }}
+
+Output the prompt directly as a single paragraph. No JSON, no preamble.
+{% endif %}

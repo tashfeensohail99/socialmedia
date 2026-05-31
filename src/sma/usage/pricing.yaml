@@ -1,0 +1,80 @@
+# Provider pricing reference. Update when providers change rates.
+# Loaded by sma.usage.pricing.PricingTable.
+
+# input_per_1m / output_per_1m: USD per 1 million tokens
+# per_unit_cost / unit_label: USD per unit (char, image, second, etc.)
+
+openai:
+  gpt-4o-mini:
+    input_per_1m: 0.15
+    output_per_1m: 0.60
+  gpt-4o:
+    input_per_1m: 2.50
+    output_per_1m: 10.00
+  gpt-4-turbo:
+    input_per_1m: 10.00
+    output_per_1m: 30.00
+  gpt-5:
+    input_per_1m: 1.25
+    output_per_1m: 10.00
+  gpt-5-mini:
+    input_per_1m: 0.25
+    output_per_1m: 2.00
+  tts-1:
+    per_unit_cost: 0.000015
+    unit_label: char
+  tts-1-hd:
+    per_unit_cost: 0.000030
+    unit_label: char
+  gpt-image-1:
+    per_unit_cost: 0.040
+    unit_label: image
+  dall-e-3:
+    per_unit_cost: 0.040
+    unit_label: image
+
+anthropic:
+  claude-sonnet-4-6:
+    input_per_1m: 3.00
+    output_per_1m: 15.00
+  claude-opus-4-7:
+    input_per_1m: 15.00
+    output_per_1m: 75.00
+  claude-haiku-4-5-20251001:
+    input_per_1m: 0.80
+    output_per_1m: 4.00
+
+gemini:
+  gemini-2.5-flash:
+    input_per_1m: 0.075
+    output_per_1m: 0.30
+  gemini-2.5-pro:
+    input_per_1m: 1.25
+    output_per_1m: 5.00
+
+nano_banana:
+  gemini-2.5-flash-image:
+    per_unit_cost: 0.039
+    unit_label: image
+
+elevenlabs:
+  eleven_turbo_v2:
+    per_unit_cost: 0.00018
+    unit_label: char
+  eleven_multilingual_v2:
+    per_unit_cost: 0.00030
+    unit_label: char
+  music-v1:
+    per_unit_cost: 0.08
+    unit_label: minute
+
+# Free providers (no cost recorded but operations are still tracked)
+pexels:
+  stock:
+    per_unit_cost: 0.0
+    unit_label: image
+
+unsplash:
+  stock:
+    per_unit_cost: 0.0
+    unit_label: image
