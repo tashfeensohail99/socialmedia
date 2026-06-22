@@ -20,6 +20,7 @@ from sqlalchemy import select
 
 from sma.core.pipeline.factory_db import build_context_for_niche
 from sma.core.pipeline.orchestrator import PipelineResult, run_pipeline
+from sma.core.pipeline.orchestrator_heygen import run_pipeline_heygen_talking_head
 from sma.core.topics.base import Topic as EngineTopic
 from sma.db.models.post import MediaAsset, Post, PostStatus
 from sma.db.models.topic import Topic as TopicRow, TopicStatus
@@ -98,14 +99,27 @@ def run_pipeline_for_db(
         post_dir_name = f"post_{post_id_db:06d}"
 
     # 4) Run the engine (writes media to disk under output_root/{post_dir_name}/)
+    avatar_mode = getattr(niche_row, "avatar_mode", "off") or "off"
     try:
-        result: PipelineResult = run_pipeline(
-            topic=engine_topic,
-            ctx=ctx,
-            output_root=output_root,
-            video_length=length,  # type: ignore[arg-type]
-            post_id=post_dir_name.replace("post_", ""),  # so on-disk dir matches our id
-        )
+        if avatar_mode == "talking_head":
+            logger.info(f"Routing post {post_id_db} through HeyGen talking-head pipeline")
+            result: PipelineResult = run_pipeline_heygen_talking_head(
+                topic=engine_topic,
+                ctx=ctx,
+                output_root=output_root,
+                avatar_library_ids=list(niche_row.avatar_library_ids or []),
+                heygen_voice_id=niche_row.heygen_voice_id or "",
+                video_length=length,  # type: ignore[arg-type]
+                post_id=post_dir_name.replace("post_", ""),
+            )
+        else:
+            result = run_pipeline(
+                topic=engine_topic,
+                ctx=ctx,
+                output_root=output_root,
+                video_length=length,  # type: ignore[arg-type]
+                post_id=post_dir_name.replace("post_", ""),  # so on-disk dir matches our id
+            )
     except Exception as e:
         logger.error(f"Pipeline failed for post {post_id_db}: {e}")
         with get_db_session() as session:
@@ -141,6 +155,10 @@ def run_pipeline_for_db(
             post.narrative_script = meta.get("narrative_script", "")
             post.hook_text = meta.get("hook_text", "")
             post.story_beats_json = meta.get("story_beats", [])
+            # Populated only on the HeyGen talking-head path.
+            if meta.get("avatar_id"):
+                post.avatar_id = meta.get("avatar_id")
+                post.avatar_cost_usd = meta.get("avatar_cost_usd")
         except Exception as e:
             logger.warning(f"Could not read engine metadata.json: {e}")
 

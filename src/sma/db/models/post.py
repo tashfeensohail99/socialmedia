@@ -64,6 +64,10 @@ class Post(Base, TenantOwned):
     generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     error_log: Mapped[str] = mapped_column(Text, nullable=False, default="")
 
+    # Set when the post was produced via HeyGen Avatar IV (niche.avatar_mode='talking_head').
+    avatar_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    avatar_cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+
     assets: Mapped[list["MediaAsset"]] = relationship(
         back_populates="post", cascade="all, delete-orphan"
     )

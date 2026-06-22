@@ -51,3 +51,14 @@ class Niche(Base, TenantOwned):
     music_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     topic_score_threshold: Mapped[float] = mapped_column(Float, nullable=False, default=7.0)
+
+    # HeyGen Avatar IV talking-head mode.
+    # 'off'          → existing slideshow pipeline (scene images + TTS + assembler)
+    # 'talking_head' → orchestrator_heygen.run_pipeline_heygen_talking_head
+    avatar_mode: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="off", server_default="off"
+    )
+    # JSON array of HeyGen trained avatar/group IDs the niche rotates through.
+    avatar_library_ids: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    # HeyGen voice ID used for the talking-head TTS.
+    heygen_voice_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
