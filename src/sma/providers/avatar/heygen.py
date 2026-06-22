@@ -67,6 +67,7 @@ class HeyGenAvatarProvider:
         output_path: Path,
         aspect: str = "9:16",
         background_color: str = "#000000",
+        talking_style: str = "stable",
     ) -> HeyGenResult:
         if not script.strip():
             raise HeyGenError("script is empty")
@@ -90,6 +91,11 @@ class HeyGenAvatarProvider:
                     "character": {
                         "type": "talking_photo",
                         "talking_photo_id": avatar_id,
+                        # 'stable' dampens facial-expression intensity during
+                        # speech — our trained avatars have smiles baked into
+                        # their source photos, so the default ('expressive')
+                        # over-animates the smile.
+                        "talking_style": talking_style,
                     },
                     "voice": {
                         "type": "text",
