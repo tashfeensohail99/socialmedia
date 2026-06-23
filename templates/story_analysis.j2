@@ -17,6 +17,31 @@ YOUR TASK
 =========
 Design the video as a coherent narrative with a strong hook, clear payoff, and {{ niche.tone }} delivery.
 
+{% if niche.language and niche.language != "en" %}
+LANGUAGE-SPECIFIC STYLE (language='{{ niche.language }}')
+========================================================
+**CRITICAL**: Write the narrative_script and voiceover_segments in the native script for `{{ niche.language }}`, BUT mix English words inline for technical/jargon terms. Match how educated Pakistanis actually talk on WhatsApp + YouTube — conversational, NOT textbook formal.
+
+**KEEP THESE TERMS IN ENGLISH** (drop them inline within Urdu sentences — do not translate them):
+visa, application, applicant, deadline, processing, decision, approval, rejection, backlog, document, status, update, news, announcement, policy, embassy, consulate, eligibility, interview, biometric, fee, fast-track, premium, scholarship, intake, university, course, semester, transcript, IELTS, TOEFL, GMAT, GRE, H-1B, F-1, J-1, B-1, B-2, PR, IRCC, USCIS, Tier 2, Schengen, Blue Card, Express Entry, and brand names (Tashfeen Immigration Solutions).
+
+**STYLE RULES**:
+- Open with the hook directly — NO greetings (no Salam, no Assalam-o-Alaikum, no Hello)
+- Address the viewer as "آپ" — direct, personal
+- Short punchy sentences, NOT long compound ones
+- Everyday vocabulary a Pakistani would actually say out loud — NOT formal Urdu prose
+
+GOOD example — natural energy + correct English mix (target this):
+"USCIS نے H-1B visa کا 1.2 million کا backlog 2026 کے end تک clear کرنے کا اعلان کیا ہے۔ پاکستانی applicants کے لیے اب decisions صرف 8 months میں ہو رہی ہیں — یہ ایک major win ہے۔ اگر آپ کا application pending ہے, تو wait time half ہو گیا ہے۔ مزید details کے لیے Tashfeen Immigration Solutions سے contact کریں۔"
+
+BAD example — formal, no English mix, textbook-style (DO NOT do this):
+"امریکہ اور سویڈن نے امیگریشن پالیسی میں بڑی تبدیلیاں کی ہیں۔ یہ تبدیلیاں آپ کی ویزا اپلیکیشن پر اثر ڈال سکتی ہیں۔ خاص طور پر نئے ویزا کے قواعد میں تبدیلیاں ہیں۔"
+
+The GOOD example mixes English 6-10 times per paragraph. The BAD example uses pure formal Urdu with words like "ویزا اپلیکیشن" and "تبدیلیاں" instead of "visa application" and "changes". Do NOT translate technical terms into formal Urdu — KEEP them English.
+
+**URDU CHARACTER-COUNT ADJUSTMENT**: Urdu Nastaliq packs more speech into fewer characters than English. For Urdu, target ~12 chars/sec instead of 15 chars/sec — so a 60-110 char short beat lands at ~5-9 seconds (vs English 4-7s).
+{% endif %}
+
 {% if video_length == "short" %}
 SHORT-VIDEO CONSTRAINTS (vertical 9:16 for Reels / TikTok / YouTube Shorts):
 - Total spoken duration: 30-50 seconds
