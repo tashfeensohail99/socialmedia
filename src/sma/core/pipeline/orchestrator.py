@@ -24,6 +24,7 @@ from sma.core.media.images.orchestrator import generate_scene_images
 from sma.core.media.images.thumbnail import generate_thumbnail
 from sma.core.media.video.assembler import assemble_video
 from sma.core.media.video.cinematic_assembler import assemble_cinematic_video
+from sma.core.media.video.cta_overlay import apply_brand_cta
 from sma.core.niche.config import VideoLength
 from sma.core.pipeline.context import PipelineContext
 from sma.core.topics.base import Topic
@@ -128,6 +129,16 @@ def run_pipeline(
             hook_text=plan.hook_text,
         )
         video_duration = video_result.duration_sec
+
+        # 4b. Burn the Tashfeen CTA badge into the last few seconds — same
+        # hardcoded brand rule that runs on the HeyGen path. apply_brand_cta
+        # writes final_with_cta.mp4 and returns its path; falls back to the
+        # un-overlaid video on any ffmpeg/PIL error so the post still ships.
+        video_path = apply_brand_cta(
+            src_video=video_path,
+            duration_sec=video_duration,
+            cta_png=output_root / "_cta_tashfeen.png",
+        )
 
     # 5. Thumbnail
     thumbnail_path = post_dir / "thumbnail.jpg"
