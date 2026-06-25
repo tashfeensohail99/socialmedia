@@ -24,6 +24,7 @@ from loguru import logger
 from sma import __version__
 from sma.config import get_settings
 from sma.worker.jobs.auto_generate import auto_generate_for_all_tenants
+from sma.worker.jobs.auto_generate_cinematic import auto_generate_cinematic_for_all_tenants
 from sma.worker.jobs.discover_topics import discover_topics_for_all_tenants
 from sma.worker.jobs.process_schedules import process_due_schedules
 from sma.worker.jobs.refresh_tokens import refresh_due_tokens
@@ -55,6 +56,14 @@ def _build_scheduler() -> BlockingScheduler:
         max_instances=1,         # video gen is heavy — never overlap
         coalesce=True,
         misfire_grace_time=600,
+    )
+    scheduler.add_job(
+        auto_generate_cinematic_for_all_tenants,
+        IntervalTrigger(hours=6),
+        id="auto_generate_cinematic",
+        max_instances=1,         # Seedance renders run 5-10 min — never overlap
+        coalesce=True,
+        misfire_grace_time=1800,
     )
     scheduler.add_job(
         refresh_due_tokens,

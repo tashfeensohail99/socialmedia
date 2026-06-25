@@ -62,3 +62,26 @@ class Niche(Base, TenantOwned):
     avatar_library_ids: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     # HeyGen voice ID used for the talking-head TTS.
     heygen_voice_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+    # Tier-A cinematic (HeyGen Seedance 2.0 cinematic_avatar). When enabled,
+    # a separate scheduler job fires every `cinematic_interval_days` and
+    # produces one silent B-roll ad — provided wallet >= cinematic_min_wallet_usd.
+    cinematic_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
+    cinematic_interval_days: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=3, server_default="3"
+    )
+    cinematic_prompt_style: Mapped[str] = mapped_column(
+        String(64), nullable=False,
+        default="immigration_office", server_default="immigration_office",
+    )
+    cinematic_min_wallet_usd: Mapped[float] = mapped_column(
+        Float, nullable=False, default=15.0, server_default="15.0"
+    )
+    cinematic_duration_sec: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=8, server_default="8"
+    )
+    cinematic_resolution: Mapped[str] = mapped_column(
+        String(8), nullable=False, default="720p", server_default="720p"
+    )

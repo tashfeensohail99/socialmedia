@@ -20,9 +20,10 @@ from sqlalchemy import select
 
 from sma.core.pipeline.factory_db import build_context_for_niche
 from sma.core.pipeline.orchestrator import PipelineResult, run_pipeline
+from sma.core.pipeline.orchestrator_cinematic import run_pipeline_cinematic
 from sma.core.pipeline.orchestrator_heygen import run_pipeline_heygen_talking_head
 from sma.core.topics.base import Topic as EngineTopic
-from sma.db.models.post import MediaAsset, Post, PostStatus
+from sma.db.models.post import MediaAsset, PipelineKind, Post, PostStatus
 from sma.db.models.topic import Topic as TopicRow, TopicStatus
 from sma.db.session import get_db_session, require_current_tenant
 from sma.providers.avatar.heygen import HeyGenAvatarProvider, HeyGenError
@@ -33,31 +34,36 @@ from sma.providers.avatar.heygen import HeyGenAvatarProvider, HeyGenError
 HEYGEN_WALLET_MIN_USD = 2.0
 
 
-def _heygen_wallet_ok(post_id_db: int) -> bool:
-    """True only if we can confirm wallet >= HEYGEN_WALLET_MIN_USD.
+def _heygen_wallet_ok_threshold(post_id_db: int, min_usd: float) -> bool:
+    """True only if we can confirm wallet >= min_usd.
 
     Wallet-check failure (missing key, network error, parse error) is treated
-    as "low" so a doomed render isn't attempted — a downgraded slideshow post
-    is recoverable, an overdrawn HeyGen render is not.
+    as "low" so a doomed render isn't attempted — a downgraded post is
+    recoverable, an overdrawn HeyGen render is not.
     """
     try:
         provider = HeyGenAvatarProvider()
     except HeyGenError as e:
-        logger.warning(f"post {post_id_db}: HeyGen unavailable ({e}) → slideshow fallback")
+        logger.warning(f"post {post_id_db}: HeyGen unavailable ({e}) → wallet=low")
         return False
     balance = provider._wallet_balance()
     if balance is None:
         logger.warning(
-            f"post {post_id_db}: HeyGen wallet check failed → slideshow fallback"
+            f"post {post_id_db}: HeyGen wallet check failed → treating as low"
         )
         return False
-    if balance < HEYGEN_WALLET_MIN_USD:
+    if balance < min_usd:
         logger.warning(
             f"post {post_id_db}: HeyGen wallet ${balance:.2f} < "
-            f"${HEYGEN_WALLET_MIN_USD:.2f} → slideshow fallback"
+            f"${min_usd:.2f} → fallback"
         )
         return False
     return True
+
+
+def _heygen_wallet_ok(post_id_db: int) -> bool:
+    """Talking-head wallet gate at HEYGEN_WALLET_MIN_USD."""
+    return _heygen_wallet_ok_threshold(post_id_db, HEYGEN_WALLET_MIN_USD)
 
 
 class PipelineRunError(RuntimeError):
@@ -72,6 +78,7 @@ def run_pipeline_for_db(
     video_length: str | None = None,
     manual_topic_title: str | None = None,
     manual_topic_content: str = "",
+    pipeline_kind: str | None = None,
 ) -> Post:
     """Run the pipeline + persist the Post.
 
@@ -132,15 +139,43 @@ def run_pipeline_for_db(
         post_dir_name = f"post_{post_id_db:06d}"
 
     # 4) Run the engine (writes media to disk under output_root/{post_dir_name}/)
-    # avatar_mode='talking_head' routes to HeyGen, BUT only if the wallet has
-    # enough to cover a render. Otherwise we transparently fall back to the
-    # original Pexels + TTS slideshow pipeline so posts keep flowing.
+    # Routing:
+    #   pipeline_kind='cinematic'   → HeyGen Seedance 2.0 (gated by cinematic_min_wallet_usd)
+    #   avatar_mode='talking_head'  → HeyGen Avatar IV  (gated by HEYGEN_WALLET_MIN_USD)
+    #   else / wallet low           → Pexels + TTS slideshow (always works, free)
     avatar_mode = getattr(niche_row, "avatar_mode", "off") or "off"
-    use_heygen = avatar_mode == "talking_head" and _heygen_wallet_ok(post_id_db)
+    chosen_kind = PipelineKind.SLIDESHOW.value  # what we'll persist on the Post row
+
+    if pipeline_kind == PipelineKind.CINEMATIC.value:
+        cinematic_min = float(getattr(niche_row, "cinematic_min_wallet_usd", 15.0) or 15.0)
+        use_cinematic = _heygen_wallet_ok_threshold(post_id_db, cinematic_min)
+    else:
+        use_cinematic = False
+    use_heygen_talking = (
+        not use_cinematic
+        and avatar_mode == "talking_head"
+        and _heygen_wallet_ok(post_id_db)
+    )
+
     try:
-        if use_heygen:
+        if use_cinematic:
+            chosen_kind = PipelineKind.CINEMATIC.value
+            logger.info(f"Routing post {post_id_db} through HeyGen CINEMATIC (Seedance) pipeline")
+            result: PipelineResult = run_pipeline_cinematic(
+                topic=engine_topic,
+                ctx=ctx,
+                output_root=output_root,
+                avatar_library_ids=list(niche_row.avatar_library_ids or []),
+                cinematic_prompt_style=getattr(niche_row, "cinematic_prompt_style", "immigration_office"),
+                cinematic_duration_sec=int(getattr(niche_row, "cinematic_duration_sec", 8)),
+                cinematic_resolution=getattr(niche_row, "cinematic_resolution", "720p"),
+                video_length=length,  # type: ignore[arg-type]
+                post_id=post_dir_name.replace("post_", ""),
+            )
+        elif use_heygen_talking:
+            chosen_kind = PipelineKind.TALKING_HEAD.value
             logger.info(f"Routing post {post_id_db} through HeyGen talking-head pipeline")
-            result: PipelineResult = run_pipeline_heygen_talking_head(
+            result = run_pipeline_heygen_talking_head(
                 topic=engine_topic,
                 ctx=ctx,
                 output_root=output_root,
@@ -150,7 +185,12 @@ def run_pipeline_for_db(
                 post_id=post_dir_name.replace("post_", ""),
             )
         else:
-            if avatar_mode == "talking_head":
+            if pipeline_kind == PipelineKind.CINEMATIC.value:
+                logger.info(
+                    f"Routing post {post_id_db} through slideshow pipeline "
+                    f"(cinematic requested but wallet too low)"
+                )
+            elif avatar_mode == "talking_head":
                 logger.info(
                     f"Routing post {post_id_db} through slideshow pipeline "
                     f"(HeyGen wallet low — fallback)"
@@ -186,6 +226,7 @@ def run_pipeline_for_db(
         post.image_provider = ctx.niche.image_provider
         post.voice_provider = ctx.niche.voice_provider
         post.music_provider = ctx.niche.music_provider if ctx.niche.music_enabled else None
+        post.pipeline_kind = chosen_kind  # which pipeline actually ran
         post.generated_at = datetime.now(timezone.utc)
 
         # Pull story_beats + narrative + hook from the on-disk metadata.json that

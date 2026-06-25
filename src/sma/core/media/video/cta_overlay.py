@@ -78,9 +78,17 @@ def add_cta_overlay(
     cta_png: Path,
     duration_sec: float,
     output_path: Path,
+    cta_seconds: float | None = None,
 ) -> None:
-    """Scale src to 1080×1920 and overlay the CTA on the last CTA_SECONDS."""
-    cta_start = max(0.0, duration_sec - CTA_SECONDS)
+    """Scale src to 1080×1920 and overlay the CTA on the last `cta_seconds`.
+
+    `cta_seconds` defaults to the module CTA_SECONDS but is capped at 40% of
+    the video's total duration — important for short cinematic clips (8-15s)
+    where a fixed 5s CTA would cover most of the runtime.
+    """
+    raw = cta_seconds if cta_seconds is not None else CTA_SECONDS
+    effective = min(raw, duration_sec * 0.4)
+    cta_start = max(0.0, duration_sec - effective)
     cta_end = duration_sec
     filter_complex = (
         f"[0:v]scale={FINAL_W}:{FINAL_H}:force_original_aspect_ratio=increase,"
@@ -109,9 +117,14 @@ def apply_brand_cta(
     src_video: Path,
     duration_sec: float,
     cta_png: Path,
+    cta_seconds: float | None = None,
 ) -> Path:
     """One-shot helper: render CTA PNG if needed, overlay onto src, return the
     new video path (sibling of src named ``final.mp4`` / ``...with_cta.mp4``).
+
+    For short clips (cinematic, 8-15s) pass an explicit `cta_seconds` ≈ 3 so
+    the badge doesn't cover most of the runtime. Defaults to 5s capped at 40%
+    of duration.
 
     Returns the original src_video path on any failure so the post still ships.
     """
@@ -123,6 +136,7 @@ def apply_brand_cta(
         add_cta_overlay(
             src_video=src_video,
             cta_png=cta_png,
+            cta_seconds=cta_seconds,
             duration_sec=duration_sec,
             output_path=out,
         )

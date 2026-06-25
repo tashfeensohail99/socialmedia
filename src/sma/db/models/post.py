@@ -25,6 +25,17 @@ class PostStatus(str, Enum):
     FAILED = "failed"          # pipeline crashed; see error_log
 
 
+class PipelineKind(str, Enum):
+    """Which production pipeline made this post.
+
+    Used by the cadence gate on the cinematic scheduler to find "the most
+    recent cinematic post" without scanning every row.
+    """
+    SLIDESHOW = "slideshow"        # Pexels + TTS + assembler (original)
+    TALKING_HEAD = "talking_head"  # HeyGen Avatar IV
+    CINEMATIC = "cinematic"        # HeyGen Seedance 2.0 cinematic_avatar
+
+
 class Post(Base, TenantOwned):
     __tablename__ = "posts"
 
@@ -67,6 +78,17 @@ class Post(Base, TenantOwned):
     # Set when the post was produced via HeyGen Avatar IV (niche.avatar_mode='talking_head').
     avatar_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     avatar_cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    # Which pipeline made this post — slideshow | talking_head | cinematic.
+    # Defaults to 'slideshow' to match the historical behavior. Backfilled by
+    # the d4e5f6a7b8c9 migration to 'talking_head' wherever avatar_id IS NOT NULL.
+    pipeline_kind: Mapped[str] = mapped_column(
+        String(16),
+        nullable=False,
+        default=PipelineKind.SLIDESHOW.value,
+        server_default=PipelineKind.SLIDESHOW.value,
+        index=True,
+    )
 
     assets: Mapped[list["MediaAsset"]] = relationship(
         back_populates="post", cascade="all, delete-orphan"
