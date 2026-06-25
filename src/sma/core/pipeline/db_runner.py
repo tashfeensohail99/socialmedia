@@ -25,6 +25,39 @@ from sma.core.topics.base import Topic as EngineTopic
 from sma.db.models.post import MediaAsset, Post, PostStatus
 from sma.db.models.topic import Topic as TopicRow, TopicStatus
 from sma.db.session import get_db_session, require_current_tenant
+from sma.providers.avatar.heygen import HeyGenAvatarProvider, HeyGenError
+
+# Minimum HeyGen wallet balance (USD) required to attempt a talking-head render.
+# Below this threshold we fall back to the Pexels + TTS slideshow pipeline so we
+# never overdraw mid-render. ~$2 leaves ~3 videos of safety margin at ~$0.65 ea.
+HEYGEN_WALLET_MIN_USD = 2.0
+
+
+def _heygen_wallet_ok(post_id_db: int) -> bool:
+    """True only if we can confirm wallet >= HEYGEN_WALLET_MIN_USD.
+
+    Wallet-check failure (missing key, network error, parse error) is treated
+    as "low" so a doomed render isn't attempted — a downgraded slideshow post
+    is recoverable, an overdrawn HeyGen render is not.
+    """
+    try:
+        provider = HeyGenAvatarProvider()
+    except HeyGenError as e:
+        logger.warning(f"post {post_id_db}: HeyGen unavailable ({e}) → slideshow fallback")
+        return False
+    balance = provider._wallet_balance()
+    if balance is None:
+        logger.warning(
+            f"post {post_id_db}: HeyGen wallet check failed → slideshow fallback"
+        )
+        return False
+    if balance < HEYGEN_WALLET_MIN_USD:
+        logger.warning(
+            f"post {post_id_db}: HeyGen wallet ${balance:.2f} < "
+            f"${HEYGEN_WALLET_MIN_USD:.2f} → slideshow fallback"
+        )
+        return False
+    return True
 
 
 class PipelineRunError(RuntimeError):
@@ -99,9 +132,13 @@ def run_pipeline_for_db(
         post_dir_name = f"post_{post_id_db:06d}"
 
     # 4) Run the engine (writes media to disk under output_root/{post_dir_name}/)
+    # avatar_mode='talking_head' routes to HeyGen, BUT only if the wallet has
+    # enough to cover a render. Otherwise we transparently fall back to the
+    # original Pexels + TTS slideshow pipeline so posts keep flowing.
     avatar_mode = getattr(niche_row, "avatar_mode", "off") or "off"
+    use_heygen = avatar_mode == "talking_head" and _heygen_wallet_ok(post_id_db)
     try:
-        if avatar_mode == "talking_head":
+        if use_heygen:
             logger.info(f"Routing post {post_id_db} through HeyGen talking-head pipeline")
             result: PipelineResult = run_pipeline_heygen_talking_head(
                 topic=engine_topic,
@@ -113,6 +150,11 @@ def run_pipeline_for_db(
                 post_id=post_dir_name.replace("post_", ""),
             )
         else:
+            if avatar_mode == "talking_head":
+                logger.info(
+                    f"Routing post {post_id_db} through slideshow pipeline "
+                    f"(HeyGen wallet low — fallback)"
+                )
             result = run_pipeline(
                 topic=engine_topic,
                 ctx=ctx,
