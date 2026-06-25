@@ -68,6 +68,7 @@ def run_pipeline_heygen_talking_head(
     heygen_voice_id: str,
     video_length: VideoLength | None = None,
     post_id: str | None = None,
+    avatar_voice_map: dict[str, str] | None = None,
 ) -> PipelineResult:
     pid = post_id or topic.id
     post_dir = output_root / f"post_{pid}"
@@ -83,14 +84,21 @@ def run_pipeline_heygen_talking_head(
     plan: StoryPlan = analyze_story(topic, ctx.niche, ctx.llm, video_length=length)
 
     avatar_id = _pick_avatar(list(avatar_library_ids), pid)
-    logger.info(f"HeyGen avatar chosen: {avatar_id}")
+    # Pick voice per avatar — falls back to niche.heygen_voice_id only if the
+    # avatar isn't in the map. This is what prevents Thompson (male) from
+    # speaking with Ramisa's (female) voice.
+    voice_for_avatar = (avatar_voice_map or {}).get(avatar_id, heygen_voice_id)
+    logger.info(
+        f"HeyGen avatar chosen: {avatar_id} voice={voice_for_avatar} "
+        f"(from_map={avatar_id in (avatar_voice_map or {})})"
+    )
 
     provider = HeyGenAvatarProvider()
     raw_video_path = video_dir / "heygen_raw.mp4"
     aspect = "16:9" if length == "long" else "9:16"
     hg = provider.generate_talking_head(
         script=plan.narrative_script,
-        voice_id=heygen_voice_id,
+        voice_id=voice_for_avatar,
         avatar_id=avatar_id,
         output_path=raw_video_path,
         aspect=aspect,

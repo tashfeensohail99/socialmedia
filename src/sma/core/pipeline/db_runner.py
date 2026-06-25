@@ -181,6 +181,7 @@ def run_pipeline_for_db(
                 output_root=output_root,
                 avatar_library_ids=list(niche_row.avatar_library_ids or []),
                 heygen_voice_id=niche_row.heygen_voice_id or "",
+                avatar_voice_map=dict(niche_row.avatar_voice_map or {}),
                 video_length=length,  # type: ignore[arg-type]
                 post_id=post_dir_name.replace("post_", ""),
             )

@@ -60,8 +60,13 @@ class Niche(Base, TenantOwned):
     )
     # JSON array of HeyGen trained avatar/group IDs the niche rotates through.
     avatar_library_ids: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
-    # HeyGen voice ID used for the talking-head TTS.
+    # HeyGen voice ID used for the talking-head TTS. This is the FALLBACK voice —
+    # any avatar listed in avatar_voice_map overrides it with its own voice.
     heygen_voice_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # Per-avatar voice mapping: {look_id: voice_id}. Lets a male avatar
+    # (e.g. Thompson) speak with a male voice while a female avatar
+    # (e.g. Ramisa) speaks with a female voice — same niche, same rotation.
+    avatar_voice_map: Mapped[dict[str, str] | None] = mapped_column(JSON, nullable=True)
 
     # Tier-A cinematic (HeyGen Seedance 2.0 cinematic_avatar). When enabled,
     # a separate scheduler job fires every `cinematic_interval_days` and
