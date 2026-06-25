@@ -117,6 +117,15 @@ def main() -> int:
         auto_generate_for_all_tenants()
     except Exception as e:
         logger.error(f"initial auto_generate failed: {e}")
+    # Cinematic startup pass — same rationale as auto_generate's startup pass.
+    # Safe because cinematic is gated by (a) niche.cinematic_enabled, (b) the
+    # cinematic_interval_days cadence check (won't fire if a cinematic post
+    # was made within the window), and (c) the wallet floor. Without this the
+    # first cinematic on a fresh deploy waits up to 6 hours for the cron tick.
+    try:
+        auto_generate_cinematic_for_all_tenants()
+    except Exception as e:
+        logger.error(f"initial auto_generate_cinematic failed: {e}")
 
     logger.info("Scheduler started. Jobs:")
     for job in scheduler.get_jobs():
